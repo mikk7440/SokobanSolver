@@ -1,5 +1,5 @@
 ######### File manipulation ###############
-f =open("map.txt","r")
+f =open("map2.txt","r")
 Data = f.readlines()
 Data = [x.strip('\n') for x in Data]
 f.close()
@@ -15,30 +15,28 @@ def PrintMap (width, Road, Diamond, Goals, Player):
     nextChar = ''
 
 
-    for i in range(len(Road)-1):
+    for i in range(len(Road)):
         for j in range(width):
 
-            while len(Road[R]) == 0:
-                R+=1
-                supR=0
+            if len(Road[R])>0:
+                if Road[R][supR] == j and R == i:
+                    nextChar='.'
+                    if supR < len(Road[R])-1:
+                        supR+=1
 
-            if Road[R][0][supR] == j and R == i:
-                nextChar='.'
-                if supR < len(Road[R][0])-1:
-                    supR+=1
-                else:
-                        R+=1
-                        supR=0
+            if Goals[G] == [i,j]:   # Need to handle when goal is under player/
+                nextChar='G'
+                if G < len(Goals)-1:
+                    G+=1
 
             if Diamond[D] == [i,j]:
                 nextChar='J'
                 if D < len(Diamond)-1:
                     D+=1
 
-            if Goals[G] == [i,j]:   # Need to handle when goal is under player/
-                nextChar='G'
-                if G < len(Goals)-1:
-                    G+=1
+            if Player[0] == [i,j]:
+                nextChar='M'
+
             if nextChar=='':
                 nextChar='X'
 
@@ -47,6 +45,9 @@ def PrintMap (width, Road, Diamond, Goals, Player):
         print(line)
         line = ""
         L = 0
+        R+=1
+        supR=0
+        #print R
     return;
 
 ########### Get meta info ################
@@ -71,6 +72,7 @@ Diamonds = []
 isGoal = 'G'
 Goals = []
 isRobotStart = 'M'
+isWall = 'X'
 RobotStart = []
 list = []
 
@@ -78,7 +80,8 @@ list = []
 for i in range(len(Data)):
     for j in range(len(Data[i])):
         if  Data[i][j] == isRoad:
-            list.append(j)
+            RoadAdjencyList[i].append(j)
+    #        list.append(j)
         elif Data[i][j] == isDiamond:
             Diamonds.append([i,j])
             list.append(j)
@@ -88,9 +91,9 @@ for i in range(len(Data)):
         elif Data[i][j] == isRobotStart:
             RobotStart.append([i,j])
             list.append(j)
-    if len(list)!= 0 :
-        RoadAdjencyList[i].append(list)
-    list = []
+    #if len(list)!= 0 :
+    #    RoadAdjencyList[i].append(list)
+    #list = []
 
 
 ########## Print lists ############################
@@ -109,5 +112,6 @@ print(RobotStart)
 print("______________________________")
 
 PrintMap(width,RoadAdjencyList,Diamonds,Goals,RobotStart)
-print width
+
+
 ############# Check move #########################
