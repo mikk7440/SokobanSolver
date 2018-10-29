@@ -5,27 +5,45 @@ Data = [x.strip('\n') for x in Data]
 f.close()
 
 ############# Print Map function #########################
-def PrintMap (width, Road, Diamond, Goals, Robot):
+def PrintMap (width, Road, Diamond, Goals, Player):
     line = ""
-    L = 0
-    D = 0
-    G = 0
-    R = 0
-    for i in range(len(Road)):
-        for j in range(width):
-            if j < len(Road)-1:
-                #if Road[i][0][L] == j:
-                #    line+='.'
-                #    print( len(Road[i][0])-1)
+    R = 0 # Road
+    supR = 0 # Sup Road
+    D = 0 #Diamond counter
+    G = 0 # Goals
+    P = 0 # Robot player
+    nextChar = ''
 
-                if Diamond[D] == [i,j]:
-                    line+='J'
-                    if D < len(Diamond)-1:
-                        D+=1
+
+    for i in range(len(Road)-1):
+        for j in range(width):
+
+            while len(Road[R]) == 0:
+                R+=1
+                supR=0
+
+            if Road[R][0][supR] == j and R == i:
+                nextChar='.'
+                if supR < len(Road[R][0])-1:
+                    supR+=1
                 else:
-                    line+='X'
-            else:
-                line+='X'
+                        R+=1
+                        supR=0
+
+            if Diamond[D] == [i,j]:
+                nextChar='J'
+                if D < len(Diamond)-1:
+                    D+=1
+
+            if Goals[G] == [i,j]:   # Need to handle when goal is under player/
+                nextChar='G'
+                if G < len(Goals)-1:
+                    G+=1
+            if nextChar=='':
+                nextChar='X'
+
+            line+=nextChar
+            nextChar =''
         print(line)
         line = ""
         L = 0
@@ -91,5 +109,5 @@ print(RobotStart)
 print("______________________________")
 
 PrintMap(width,RoadAdjencyList,Diamonds,Goals,RobotStart)
-
+print width
 ############# Check move #########################
