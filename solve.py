@@ -1,54 +1,8 @@
 ######### File manipulation ###############
-f =open("map2.txt","r")
+f =open("map.txt","r")
 Data = f.readlines()
 Data = [x.strip('\n') for x in Data]
 f.close()
-
-############# Print Map function #########################
-def PrintMap (width, Road, Diamond, Goals, Player):
-    line = ""
-    R = 0 # Road
-    supR = 0 # Sup Road
-    D = 0 #Diamond counter
-    G = 0 # Goals
-    P = 0 # Robot player
-    nextChar = ''
-
-
-    for i in range(len(Road)):
-        for j in range(width):
-
-            if len(Road[R])>0:
-                if Road[R][supR] == j and R == i:
-                    nextChar='.'
-                    if supR < len(Road[R])-1:
-                        supR+=1
-
-            if Goals[G] == [i,j]:   # Need to handle when goal is under player/
-                nextChar='G'
-                if G < len(Goals)-1:
-                    G+=1
-
-            if Diamond[D] == [i,j]:
-                nextChar='J'
-                if D < len(Diamond)-1:
-                    D+=1
-
-            if Player[0] == [i,j]:
-                nextChar='M'
-
-            if nextChar=='':
-                nextChar='X'
-
-            line+=nextChar
-            nextChar =''
-        print(line)
-        line = ""
-        L = 0
-        R+=1
-        supR=0
-        #print R
-    return;
 
 ########### Get meta info ################
 info= Data[0].split(" ")
@@ -84,13 +38,14 @@ for i in range(len(Data)):
     #        list.append(j)
         elif Data[i][j] == isDiamond:
             Diamonds.append([i,j])
-            list.append(j)
+            RoadAdjencyList[i].append(j)
         elif Data[i][j] == isGoal:
             Goals.append([i,j])
-            list.append(j)
+            RoadAdjencyList[i].append(j)
         elif Data[i][j] == isRobotStart:
-            RobotStart.append([i,j])
-            list.append(j)
+            RobotStart.append(i)
+            RobotStart.append(j)
+            RoadAdjencyList[i].append(j)
     #if len(list)!= 0 :
     #    RoadAdjencyList[i].append(list)
     #list = []
@@ -111,7 +66,156 @@ print(RobotStart)
 
 print("______________________________")
 
-PrintMap(width,RoadAdjencyList,Diamonds,Goals,RobotStart)
+############# Game as a class ####################
+class State(object):
+    Road = []
+    Diamonds = []
+    Goals = []
+    Player = []
+    width=0
+    # The class "constructor" - It's actually an initializer
+    def __init__(self, Road, Diamonds, Goals, Player, width):
+        self.Road = Road
+        self.Diamonds = Diamonds
+        self.Goals = Goals
+        self.Player = Player
+        self.width= width
+
+    def PMap (self):
+        line = ""
+        R = 0 # Road
+        supR = 0 # Sup Road
+        D = 0 #Diamond counter
+        G = 0 # Goals
+        P = 0 # Robot player
+        nextChar = ''
+
+        for i in range(len(self.Road)):
+            for j in range(self.width):
+
+                if len(self.Road[R])>0:
+                    if self.Road[R][supR] == j and R == i:
+                        nextChar='.'
+                        if supR < len(self.Road[R])-1:
+                            supR+=1
+
+                if self.Goals[G] == [i,j]:   # Need to handle when goal is under player/
+                    nextChar='G'
+                    if G < len(Goals)-1:
+                        G+=1
+
+                if self.Diamonds[D] == [i,j]:
+                    nextChar='J'
+                    if D < len(self.Diamonds)-1:
+                        D+=1
+
+                if self.Player[0] == i and self.Player[1] == j:
+                    nextChar='M'
+
+                if nextChar=='':
+                    nextChar='X'
+
+                line+=nextChar
+                nextChar =''
+            print(line)
+            line = ""
+            L = 0
+            R+=1
+            supR=0
+            #print R
+        return;
+
+    def up (self):
+        row = self.Player[0]-1
+        col = self.Player[1]
+        DoubleDimond = False
+
+        if [row,col] in self.Diamonds:
+            # move Diamond
+            if [row+1,col] in self.Diamonds:
+                DoubleDimond=True
+
+        if col in self.Road[row] and not DoubleDimond:
+            self.Player[0]=row
+
+        if self.Player[0] == row:
+            return True;
+        else:
+            return False;
+    def down (self):
+        row = self.Player[0]+1
+        col = self.Player[1]
+        DoubleDimond=False
+
+        if [row,col] in self.Diamonds:
+            # move Diamond
+            if [row+1,col] in self.Diamonds:
+                DoubleDimond=True
+
+        if col in self.Road[row] and not DoubleDimond:
+            self.Player[0]=row
+
+        if self.Player[0] == row:
+            return True;
+        else:
+            return False;
+    def right (self):
+        row = self.Player[0]
+        col = self.Player[1]+1
+        DoubleDimond=False
+
+        if [row,col] in self.Diamonds:
+            # move Diamond
+            if [row,col+1] in self.Diamonds:
+                DoubleDimond=True
+
+        print col, self.Road[row]
+        if col in self.Road[row] and not DoubleDimond:
+            self.Player[1]=col
+
+        if self.Player[1] == col:
+            return True;
+        else:
+            return False;
+    def left (self):
+        row = self.Player[0]
+        col = self.Player[1]-1
+        DoubleDimond=False
+
+        if [row,col] in self.Diamonds:
+            # move Diamond
+            if [row,col-1] in self.Diamonds:
+                DoubleDimond=True
+
+        if col in self.Road[row] and not DoubleDimond:
+            self.Player[1]=col
+
+        if self.Player[1] == col:
+            return True;
+        else:
+            return False;
+
+def init_State( Road, Diamonds, Goals, Player, width):
+    state = State(Road, Diamonds, Goals, Player, width)
+    return state
+
+game = init_State(RoadAdjencyList,Diamonds,Goals,RobotStart,width)
+i=1
+game.left()
+print game.Player
+game.PMap()
+game.up()
+print game.Player
+game.PMap()
+game.up()
+print game.Player
+game.PMap()
+game.right()
+print game.Player
+game.PMap()
+game.right()
+print game.Player
+game.PMap()
 
 
 ############# Check move #########################
