@@ -2,11 +2,11 @@
 
 
 Class state
-  Road = []
-  Diamonds = []
-  Goals = []
-  Player = []
-  width=0
+  Road = [],
+  Diamonds = [],
+  Goals = [],
+  Player = [],
+  width=0,
 
 state.PMap()
   prints map in current State

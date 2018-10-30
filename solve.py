@@ -104,8 +104,9 @@ class State(object):
                     if G < len(Goals)-1:
                         G+=1
 
-                if self.Diamonds[D] == [i,j]:
+                if [i,j] in self.Diamonds: # needs to check all dimonds, can be moved.
                     nextChar='J'
+                    #print self.Diamonds[D] , [i,j]
                     if D < len(self.Diamonds)-1:
                         D+=1
 
@@ -129,11 +130,22 @@ class State(object):
         row = self.Player[0]-1
         col = self.Player[1]
         DoubleDimond = False
-
+        DimondBlocked=False
         if [row,col] in self.Diamonds:
             # move Diamond
-            if [row+1,col] in self.Diamonds:
+            if [row-1,col] in self.Diamonds:
                 DoubleDimond=True
+            else:#no dimond besides dimond
+                for i in range(len(Diamonds)): #Find dimond and check if its movable
+                    if [row,col] == Diamonds[i]:
+                        for j in range(len(Diamonds)):
+                            if [row-1,col] == Diamonds[j]:
+                                DimondBlocked=True
+                        if col in self.Road[row-1]: #Road pice after moved.... NO EXCEPTIon CATCH
+                            if not DimondBlocked: # check for not blocked
+                                Diamonds[i]=[row-1,col]
+                        else: #There is a isWall
+                            DimondBlocked = True
 
         if col in self.Road[row] and not DoubleDimond:
             self.Player[0]=row
@@ -146,13 +158,25 @@ class State(object):
         row = self.Player[0]+1
         col = self.Player[1]
         DoubleDimond=False
+        DimondBlocked=False
 
         if [row,col] in self.Diamonds:
-            # move Diamond
             if [row+1,col] in self.Diamonds:
                 DoubleDimond=True
+            else:#no dimond besides dimond
+                for i in range(len(Diamonds)): #Find dimond and check if its movable
+                    if [row,col] == Diamonds[i]:
+                        for j in range(len(Diamonds)):
+                            if [row+1,col] == Diamonds[j]:
+                                DimondBlocked=True
+                        if col in self.Road[row+1]: #Road pice after moved.... NO EXCEPTIon CATCH
+                            if not DimondBlocked: # check for not blocked
+                                Diamonds[i]=[row+1,col]
+                        else: #There is a isWall
+                            DimondBlocked = True
 
-        if col in self.Road[row] and not DoubleDimond:
+
+        if col in self.Road[row] and not DoubleDimond and not DimondBlocked:
             self.Player[0]=row
 
         if self.Player[0] == row:
@@ -163,14 +187,24 @@ class State(object):
         row = self.Player[0]
         col = self.Player[1]+1
         DoubleDimond=False
+        DimondBlocked=False
 
         if [row,col] in self.Diamonds:
-            # move Diamond
-            if [row,col+1] in self.Diamonds:
+            if [row,col+1] in self.Diamonds: #Dimond next to diamond
                 DoubleDimond=True
+            else:#no dimond besides dimond
+                for i in range(len(Diamonds)): #Find dimond and check if its movable
+                    if [row,col] == Diamonds[i]:
+                        for j in range(len(Diamonds)):
+                            if [row,col+1] == Diamonds[j]:
+                                DimondBlocked=True
+                        if col+1 in self.Road[row]: #Road pice after moved
+                            if not DimondBlocked: # check for not blocked
+                                Diamonds[i]=[row,col+1]
+                        else: #There is a isWall
+                            DimondBlocked = True
 
-        print col, self.Road[row]
-        if col in self.Road[row] and not DoubleDimond:
+        if col in self.Road[row] and not DoubleDimond and not DimondBlocked:
             self.Player[1]=col
 
         if self.Player[1] == col:
@@ -181,13 +215,25 @@ class State(object):
         row = self.Player[0]
         col = self.Player[1]-1
         DoubleDimond=False
+        DimondBlocked=False
 
         if [row,col] in self.Diamonds:
             # move Diamond
             if [row,col-1] in self.Diamonds:
                 DoubleDimond=True
+            else:#no dimond besides dimond
+                for i in range(len(Diamonds)): #Find dimond and check if its movable
+                    if [row,col] == Diamonds[i]:
+                        for j in range(len(Diamonds)):
+                            if [row,col-1] == Diamonds[j]:
+                                DimondBlocked=True
+                        if col-1 in self.Road[row]: #Road pice after moved
+                            if not DimondBlocked: # check for not blocked
+                                Diamonds[i]=[row,col-1]
+                        else: #There is a isWall
+                            DimondBlocked = True
 
-        if col in self.Road[row] and not DoubleDimond:
+        if col in self.Road[row] and not DoubleDimond and not DimondBlocked:
             self.Player[1]=col
 
         if self.Player[1] == col:
@@ -200,22 +246,37 @@ def init_State( Road, Diamonds, Goals, Player, width):
     return state
 
 game = init_State(RoadAdjencyList,Diamonds,Goals,RobotStart,width)
-i=1
+
 game.left()
-print game.Player
+#print game.Player
 game.PMap()
 game.up()
-print game.Player
+#print game.Player
 game.PMap()
 game.up()
-print game.Player
+#print game.Player
 game.PMap()
 game.right()
-print game.Player
+#print game.Player
+game.PMap()
+game.left()
+#print game.Player
+game.PMap()
+game.down()
+#print game.Player
+game.PMap()
+game.down()
+#print game.Player
 game.PMap()
 game.right()
-print game.Player
+#print game.Player
 game.PMap()
 
+game.up()
+#print game.Player
+game.PMap()
 
+game.up()
+#print game.Player
+game.PMap()
 ############# Check move #########################
