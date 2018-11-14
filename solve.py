@@ -81,6 +81,11 @@ class State(object):
         self.Player = Player
         self.width= width
 
+    def getNeigboorsNotLast(self,oldPosition):
+        currentN = self.neigboors()
+        currentN.remove(oldPosition)
+        return currentN
+
     def neigboors(self):                               # Neeed to reverse moves!=!
         neigboors = []
 
@@ -164,7 +169,7 @@ class State(object):
                         else: #There is a isWall
                             DimondBlocked = True
 
-        if col in self.Road[row] and not DoubleDimond:
+        if col in self.Road[row] and not DoubleDimond and not DimondBlocked:
             self.Player[0]=row
 
         if self.Player[0] == row:
@@ -191,7 +196,6 @@ class State(object):
                                 Diamonds[i]=[row+1,col]
                         else: #There is a isWall
                             DimondBlocked = True
-
 
         if col in self.Road[row] and not DoubleDimond and not DimondBlocked:
             self.Player[0]=row
@@ -280,7 +284,7 @@ class State(object):
                         else: #There is a isWall
                             DimondBlocked = True
 
-        if col in self.Road[row] and not DoubleDimond:
+        if col in self.Road[row] and not DoubleDimond and not DimondBlocked:
             #self.Player[0]=row on't move it when check!
             check = row
 
@@ -400,9 +404,13 @@ game.PMap()
 game.up()
 # print game.Player
 game.PMap()
+print "=======================================\n"
+anOldPosition = (game.Player[0],game.Player[1])
+print anOldPosition
 game.right()
 game.up()
 game.PMap() #!!! ERROR Diamond through wall!=!
+print "=======================================\n"
 # print game.Player
 # game.PMap()
 # game.left()
@@ -426,12 +434,6 @@ game.PMap() #!!! ERROR Diamond through wall!=!
 # #print game.Player
 # game.PMap()
 
-print "=======================================\n"
-
-# Fset = tuple(game.Road)
-# print Fset
-# print "Nice\n"
-# print Fset[1][1]
 print game.neigboors()
 game.PMap()
 print "=======================================\n"
