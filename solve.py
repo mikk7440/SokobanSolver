@@ -1,5 +1,5 @@
 ######### File manipulation ###############
-f =open("map.txt","r")
+f =open("simpleMap.txt","r")
 Data = f.readlines()
 Data = [x.strip('\n') for x in Data]
 f.close()
@@ -66,6 +66,22 @@ print(RobotStart)
 
 print("______________________________")
 
+############# Class for search queue ###############
+import heapq
+
+class PQueue:
+    def __init__(self):
+        self.elements = []
+
+    def empty(self):
+        return len(self.elements)==0
+
+    def put(self, item, priority):
+        heapq.heappush(self.elements, (priority,item))
+
+    def get(self):
+        return heapq.heappop(self.elements)[1]
+
 ############# Game as a class ####################
 class State(object):
     Road = []
@@ -80,6 +96,8 @@ class State(object):
         self.Goals = Goals
         self.Player = Player
         self.width= width
+    def getPlayer(self):
+        return tuple(self.Player)
 
     def getNeigboorsNotLast(self,oldPosition):
         currentN = self.neigboors()
@@ -90,16 +108,16 @@ class State(object):
         neigboors = []
 
         if self.CheckUp():
-            neigboors.append((self.Player[0]-1,self.Player[1]))
+            neigboors.append(((self.Player[0]-1,self.Player[1]),"up"))
 
         if self.CheckDown():
-            neigboors.append((self.Player[0]+1,self.Player[1]))
+            neigboors.append(((self.Player[0]+1,self.Player[1]),"down"))
 
         if self.CheckLeft():
-            neigboors.append((self.Player[0],self.Player[1]-1))
+            neigboors.append(((self.Player[0],self.Player[1]-1),"left"))
 
         if self.CheckRight():
-            neigboors.append((self.Player[0],self.Player[1]+1))
+            neigboors.append(((self.Player[0],self.Player[1]+1),"right"))
 
         return neigboors
 
@@ -384,7 +402,8 @@ class State(object):
             return True;
         else:
             return False;
-
+    def SaveState (self):
+        return init_State(self.Road,self.Diamonds,self.Goals,self.Player,self.width)
 
 def init_State( Road, Diamonds, Goals, Player, width):
     state = State(Road, Diamonds, Goals, Player, width)
@@ -392,102 +411,113 @@ def init_State( Road, Diamonds, Goals, Player, width):
 
 game = init_State(RoadAdjencyList,Diamonds,Goals,RobotStart,width)
 
-
 ######################## move #########################
 #
-game.left()
-# print game.Player
-game.PMap()
-game.up()
-# print game.Player
-game.PMap()
-game.up()
-# print game.Player
-game.PMap()
-print "=======================================\n"
-anOldPosition = (game.Player[0],game.Player[1])
-print anOldPosition
-game.right()
-game.up()
-game.PMap() #!!! ERROR Diamond through wall!=!
-print "=======================================\n"
-# print game.Player
-# game.PMap()
 # game.left()
-# #print game.Player
+# # print game.Player
 # game.PMap()
-# game.down()
-# #print game.Player
+# game.up()
+# # print game.Player
 # game.PMap()
-# game.down()
-# #print game.Player
+# game.up()
+# # print game.Player
 # game.PMap()
 # game.right()
-# #print game.Player
-# game.PMap()
-#
-# game.up()
-# #print game.Player
-# game.PMap()
-#
-# game.up()
-# #print game.Player
-# game.PMap()
-
-print game.neigboors()
-game.PMap()
-print "=======================================\n"
-
+# game.PMap() #!!! ERROR Diamond through wall!=!
+# print "=======================================\n"
+# print "=======================================\n"
 ###################### Search ###############################
-import heapq
-
-class PQueue:
-    def __init__(self):
-        self.elements = []
-
-    def empty(self):
-        return len(self.elements)==0
-
-    def put(self, item, priority):
-        heapq.heappush(self.elements, (priority,item))
-
-    def get(self):
-        return heapq.heappop(self.elements)[1]
-
-
-def dijkstra_search(graphToT,startToT,goalToT):
-    graph = tuple(graphToT)
-    start = tuple(startToT)
+def dsearch(game):
+    graph = tuple(self.Road)
+    start = tuple(self.Player)
     goal = tuple(goalToT)
     frontier = PQueue()
-    frontier.put(0,start)
+    frontier.put(self,0) #Item, prioty
+    print "Starting in: ", start
     came_from = {}
     cost_so_far={}
     came_from[start] = 0
     cost_so_far[start]= 0
 
+    NewGame = init_State(self.Road,self.Diamonds,self.Goals,self.Player,self.width)
+
+
     while not frontier.empty():
         current = frontier.get()
-        print "Current init: ", current
+        print "Current: ", current.PMap()
 
         if current ==  goal:
             print "Goal: ", current, " == ", goal
             break
 
-        print graph[current], ": graph[current]"
-        for next in graph[current]:
+        print "Print neigboors: ", self.neigboors()
+        for next in self.neigboors():
 
             new_cost = cost_so_far[current] + 1
             if next not in cost_so_far or new_cost < cost_so_far[next]:
                 cost_so_far[next] = new_cost
                 priority = new_cost
-                frontier.put(priority, next )
+                frontier.put(next,priority) #Item, priority
                 came_from[next] = current
 
     return came_from, cost_so_far
 
-print game.Road
-if game.Player[1] in game.Road[game.Player[0]]:
-    print game.Player
+def justSearch(game):
+    #nGoals
+    goals = game.Goals
+    # Init Priot Queue
+    Q = PQueue()
+    Q.put(game,0)   # Item, prioty
+    # Init path and cost dictonaries
+    came_from  = {} # Create dictonary
+    cost_so_far= {}
+    came_from[game.getPlayer()] = 0 # tuple player position
+    cost_so_far[game.getPlayer()]= 0
+    gamelist=[]
 
-print  dijkstra_search(game.Road,game.Player,[6,2])
+
+    while not Q.empty():
+        currentState = Q.get()
+        print "\nCurrentState map:"
+        currentState.PMap()
+
+    print "\nIs diamonds: ", currentState.Diamonds , " == ", goals
+    if currentState.Diamonds == goals:    # Need to implement sevelreal goals
+        print "Yes, congratz!"
+        pass
+
+    print "\nCurrentState neigboors: ", currentState.neigboors()
+    for next in currentState.neigboors():
+        print "     Child position: ", next[0], " Direction: ", next[1]
+        Direction = next[1]
+        NewGame = currentState.SaveState()
+        if Direction == "up":
+            print "     Went up"
+        elif Direction == "down":
+            print "     Went down"
+        elif Direction == "right":
+            print "     Went right"
+        elif Direction == "left":
+            print "     Went left"
+        else:
+            print "ERROR 01: next[1] was a Unvalid direction"
+
+
+    print "\n===== Search finish =========\n"
+    return came_from
+
+print justSearch(game)
+
+print "\nTO do:"
+print "* Implent move in search to get new neighboors"
+print "* Implent move in search to get new neighboors"
+#Came,Cost = game.dsearch([6,3])
+#print "Came: ", Came
+#print "Cost: ", Cost
+
+#OutPut
+#L=left
+#R=right
+#F=front
+#B=back
+#['']

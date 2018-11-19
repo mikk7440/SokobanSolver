@@ -1,5 +1,7 @@
 #SokobanSolver
 
+To do:
+* add limit -> can't push box to corner unless goal 
 
 Class state
   Road = [],
